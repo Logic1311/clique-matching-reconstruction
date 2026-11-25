@@ -1,0 +1,8 @@
+*.olean
+*.ilean
+*.aux
+*.out
+*.synctex.gz
+/verify
+/verify.exe
+__pycache__/

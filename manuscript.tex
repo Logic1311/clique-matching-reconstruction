@@ -1,0 +1,179 @@
+\documentclass[11pt]{article}
+\usepackage[a4paper,margin=25mm]{geometry}
+\usepackage{amsmath,amssymb,amsthm,booktabs,hyperref}
+\hypersetup{colorlinks=true,linkcolor=blue,urlcolor=blue,citecolor=blue}
+\newtheorem{theorem}{Theorem}
+\newtheorem{lemma}[theorem]{Lemma}
+\newcommand{\F}{F}
+\newcommand{\rn}{\operatorname{rn}}
+\title{Exact ally and adversary reconstruction numbers\\of two cliques joined by a partial matching}
+\author{AI-assisted research manuscript\\Author attribution pending human review}
+\date{26 November 2026 (JST) --- version 0.4 (machine-checked; 2026 literature reviewed)}
+\begin{document}
+\maketitle
+\begin{abstract}
+Let $F(c,c,b)$ denote the graph consisting of two disjoint $c$-cliques connected by a matching of size $b$, where $c\geq4$ and $2\leq b<c$. McMullen and Radziszowski (2007, Theorem 5 and Section 2.2.4) established that its ally reconstruction number exceeds three and asked for an exact general determination. We derive a closed formula: writing $s=c-b$, the ally reconstruction number is $\min(b+2,s+3)$ for $s\geq2$, and $\max(5,c)$ for $s=1$. The adversary reconstruction number is $c+2$. A structural lemma classifies all competing graphs possessing four or more cards of the two possible types. It yields an exact description of every identifying subdeck, without restricting competitors to the original graph family. Exhaustive enumeration verifies all 28 parameter pairs for $3\leq c\leq9$; an independent graph-isomorphism implementation verifies the six smallest pairs. The case $(c,b)=(3,2)$ has ally and adversary numbers $4$ and $5$, respectively, by finite enumeration. The complete profile characterization was additionally checked for 1,581 feasible subdecks. The general theorem, including graph isomorphism and arbitrary finite competing graphs, has been formally verified in Lean 4.28.0. Sathiyabama and Monikandan (2026, Theorem 9) provide lower bounds for a larger construction containing this entire family. We supply exact upper bounds, the complete blocker characterization, and the adversary formula.
+\end{abstract}
+\section{Problem and definitions}
+All graphs are finite, undirected and simple, and all isomorphisms are unlabeled. The vertex deck $D(G)$ is the multiset of graphs $G-v$ indexed by $v\in V(G)$. A subdeck identifies $G$ if it is not contained, with multiplicities, in $D(H)$ for any $H\not\cong G$. The ally reconstruction number $\rn_\exists(G)$ is the least size of an identifying subdeck. The adversary reconstruction number $\rn_\forall(G)$ is the least size such that every subdeck of that size identifies $G$.
+
+Write $F(p,q,k)$ for two disjoint cliques of orders $p,q$ with a matching of $k$ edges between them, where $0\leq k\leq\min(p,q)$. This graph is unique up to isomorphism for given parameters. The family $F(c,c,b)$ appeared in the work of Harary and Plantholt \cite{HP}. McMullen and Radziszowski \cite[Theorem 5, Table 2 and Section 2.2.4]{MR} proved $\rn_\exists(F(c,c,b))>3$ for $c\geq3$ and $2\leq b<c$; they explicitly left the exact formula in $b,c$ for future work. Their Table 2 includes the six instances with at most ten vertices. The following theorem provides an exact calculation for that family and the associated adversary problem. The recent lower bounds of Sathiyabama and Monikandan \cite[Theorem 9]{SM} apply to this entire family; our contribution is an exact calculation (in particular, the matching upper bounds), the adversary number, and the blocker characterization. Section~\ref{sec:prior} compares the bounds explicitly. It is not a proof of the general graph reconstruction conjecture.
+\begin{theorem}\label{thm:main}
+Let $c\geq4$, $2\leq b<c$ and $s=c-b$. Then
+\[
+\rn_\exists(F(c,c,b))=\begin{cases}
+\min(b+2,s+3),&s\geq2,\\
+\max(5,c),&s=1,
+\end{cases}
+\qquad \rn_\forall(F(c,c,b))=c+2.
+\]
+\end{theorem}
+\section{The two cards and a structural lemma}
+For the rest of the analytic argument assume $c\geq4$. Put $G=F(c,c,b)$ and define
+\[
+ A=F(c,c-1,b-1),\qquad B=F(c,c-1,b).
+\]
+Deleting an endpoint of a crossing edge gives $A$; deleting an unmatched vertex gives $B$. Consequently $D(G)=A^{2b}B^{2s}$. These types are distinct since their edge counts differ by one. A vertex of a competing graph $H$ is called good if its deletion produces $A$ or $B$.
+\begin{lemma}\label{lem:structure}
+If a graph $H$ on $2c$ vertices has at least four good vertices, then $H$ is isomorphic to $F(c,c,k)$ or $F(c+1,c-1,k)$ for some admissible $k$.
+\end{lemma}
+\begin{proof}
+Choose a good vertex $v$. Partition $H-v$ into a clique $X$ of size $c$ and a clique $Y$ of size $c-1$, with crossing edges forming a matching. Every other good vertex $w$ gives a partition of $H-w$ into cliques of sizes $c,c-1$ with crossing edges a matching. In any such partition a clique of size at least three is contained entirely in one part: otherwise it would contain a vertex incident with two crossing edges.
+
+If $w\in X$, the cliques $X\setminus\{w\}$ and $Y$ both have size $c-1\geq3$, so each lies in a part of the new partition. They cannot lie in the same part since $2c-2>c$. Hence the new partition is obtained by extending exactly one of these two cliques by $v$. If $w\in Y$, the clique $X$ has size $c$, fills the larger part, and the remaining vertices, including $v$, fill the other part. Thus each good $w\ne v$ assigns $v$ to the $X$-side or the $Y$-side, with all other vertices retaining their sides.
+
+The assignment is consistent: if one good deletion places $v$ on the $X$-side, it is adjacent to every surviving vertex of $X$. If another places $v$ on the $Y$-side, it has at most one neighbor in the surviving $X$. The two surviving subsets of $X$ have at least $c-2\geq2$ vertices in common, a contradiction. Extend $X,Y$ by placing $v$ on the common assigned side. The resulting partition of $H$ has sizes $c,c$ or $c+1,c-1$. Every good deletion, including deletion of $v$, respects it.
+
+A missing edge within a part would be witnessed by its two endpoints. Two crossing edges with a common endpoint would be witnessed by their three endpoints. Since there are at least four good vertices, some good deletion avoids every vertex of any such witness. This contradicts the properties of its inherited partition. Therefore both parts are complete and the crossing edges form a matching. This proves the lemma.
+\end{proof}
+\section{Exact description of identifying subdecks}
+For any $H$ on $2c$ vertices define $n_A(H)$ and $n_B(H)$ as the numbers of its vertices yielding cards of the indicated types. A subdeck $A^aB^d$ with $0\leq a\leq2b$, $0\leq d\leq2s$ is blocked by $H\not\cong G$ precisely when $a\leq n_A(H)$ and $d\leq n_B(H)$.
+\begin{theorem}\label{thm:profiles}
+For the above range of parameters, a subdeck $A^aB^d$ fails to identify $G$ if and only if $(a,d)$ is componentwise at most one of
+\[
+ P_1=(2(s+1),0),\qquad P_2=(0,2(b+1)),\qquad P_3=(b,s+1).
+\]
+\end{theorem}
+\begin{proof}
+The three profiles are realized by the nonisomorphic competitors $F(c,c,b-1)$, $F(c,c,b+1)$ and $F(c+1,c-1,b)$ respectively. Their parameters are admissible throughout the stated range. The balanced competitors differ from $G$ in edge count. The unbalanced competitor has a clique of order $c+1$, whereas $G$ has clique number $c$ (no triangle crosses its matching). This proves sufficiency for blockage.
+
+Conversely, suppose $H\not\cong G$ blocks a subdeck. If $a+d\geq4$, Lemma~\ref{lem:structure} applies. In a balanced graph $F(c,c,k)$, deleting a matched vertex produces $F(c,c-1,k-1)$, and deleting an unmatched vertex produces $F(c,c-1,k)$. The value $k=b$ is excluded because it gives $G$. In an unbalanced graph $F(c+1,c-1,k)$, a deletion in the smaller part leaves a clique of order $c+1$ and cannot yield $A$ or $B$. Deletions in the larger part give a card with the crossing matching reduced by one if the vertex was matched and unchanged otherwise. Comparing edge counts for the cards yields the complete list of nonzero profiles:
+\begin{center}
+\begin{tabular}{lcc}
+\toprule
+Competitor & $n_A$ & $n_B$\\
+\midrule
+$F(c,c,b-1)$ & $2(s+1)$ & $0$\\
+$F(c,c,b+1)$ & $0$ & $2(b+1)$\\
+$F(c+1,c-1,b-1)$ & $s+2$ & $0$\\
+$F(c+1,c-1,b)$ & $b$ & $s+1$\\
+$F(c+1,c-1,b+1)$, if $s\geq2$ & $0$ & $b+1$\\
+\bottomrule
+\end{tabular}
+\end{center}
+All other admissible $k$ give neither card. The third and fifth rows are dominated componentwise by the first and second. Thus every blocked subdeck of size at least four is dominated by $P_1,P_2$ or $P_3$. Finally all feasible subdecks of size at most three are dominated by these same profiles: pure subdecks are covered by $P_1$ or $P_2$, and mixed subdecks have $a,d\leq2$, covered by $P_3$ since $b\geq2$ and $s+1\geq2$. This completes the proof.
+\end{proof}
+\section{Derivation of the two reconstruction numbers}
+\begin{proof}[Proof of Theorem~\ref{thm:main}]
+For a mixed subdeck ($a,d>0$), the two pure profiles cannot block it. To escape $P_3$ one needs either $a\geq b+1$ or $d\geq s+2$. The least size in the former case is $b+2$ (always feasible), and in the latter it is $s+3$ (feasible exactly when $s\geq2$).
+
+For a pure $A$ subdeck the minimum identifying count, if feasible, is $\max(2(s+1),b)+1$; for a pure $B$ subdeck it is $\max(2(b+1),s+1)+1$. If $s\geq2$, the pure counts are at least $2s+3$ and $2b+3$ respectively, so neither can improve on $\min(b+2,s+3)$. If $s=1$, no pure $B$ subdeck can identify, and the pure $A$ count $\max(4,b)+1$ is feasible for $b\geq3$ (which follows from $c\geq4$). Taking its minimum with $b+2$ gives $\max(5,c)$.
+
+For the adversary number we maximize the size of a blocked subdeck. Truncating the profiles by the available counts $(2b,2s)$ gives maximum sizes
+\[
+ \min(2b,2(s+1)),\quad \min(2s,2(b+1)),\quad b+s+1.
+\]
+Each of the first two is at most $c+1$ by comparison with the average of its arguments. The third is exactly $c+1$ and is feasible since $b\leq2b$ and $s+1\leq2s$. Hence some subdeck of size $c+1$ is blocked, but none of size $c+2$ is. This establishes the adversary formula and the theorem.
+\end{proof}
+\section{Exhaustive verification and reproducibility}
+The analytic proof applies for $c\geq4$. For additional independent checks, the companion C++17 implementation enumerates every possible extension of either $A$ or $B$ by one vertex. For each of the $2^{2c-1}$ possible neighborhoods of that new vertex it constructs $H$, excludes graphs isomorphic to $G$, and computes all its vertex-deleted cards. Every competitor sharing at least one card with $G$ has a labeled representative among these extensions. Duplicate representations do not affect the set of blocker profiles. A direct recognition test enumerates all possible candidates for the larger clique containing a maximum-degree vertex. For $k>0$ that vertex has degree $p$ in $F(p,q,k)$ with $p\geq q$ and $p-q\leq1$, and belongs to a larger clique (either if equal). Each candidate is obtained by excluding its unique possible crossing neighbor. The test verifies the two clique sizes, all within-clique edges, the crossing matching property, and total edge count. It therefore does not assume the structural lemma.
+
+The computation passed assertions for every $3\leq c\leq9$ and $2\leq b<c$: 28 parameter pairs and 2,330,176 labeled one-vertex extensions, counting duplicates. Independently, \texttt{verify\_small.py} uses NetworkX general graph isomorphism rather than the specialized recognition algorithm, reproducing the six cases $3\leq c\leq5$. All six ally values agree with Table 2 of \cite{MR}. In particular, the smallest pair $(3,2)$ has ally number 4 and adversary number 5 by finite enumeration. We do not claim Lemma~\ref{lem:structure} for $c=3$.
+\begin{center}
+\begin{tabular}{rllr}
+\toprule
+$c$ & $b$ range & Ally numbers in increasing $b$ & Adversary number\\
+\midrule
+3 & 2 & 4 & 5\\
+4 & 2--3 & 4, 5 & 6\\
+5 & 2--4 & 4, 5, 5 & 7\\
+6 & 2--5 & 4, 5, 5, 6 & 8\\
+7 & 2--6 & 4, 5, 6, 5, 7 & 9\\
+8 & 2--7 & 4, 5, 6, 6, 5, 8 & 10\\
+9 & 2--8 & 4, 5, 6, 7, 6, 5, 9 & 11\\
+\bottomrule
+\end{tabular}
+\end{center}
+Compile with \texttt{g++ -O3 -std=c++17 verify.cpp -o verify}; run \texttt{./verify 9}. For the independent check, install NetworkX and run \texttt{python verify\_small.py}. The full output is included as \texttt{results.csv} and \texttt{small\_results.txt}. The exhaustive implementation also checks the equivalence in Theorem~\ref{thm:profiles} for all 1,581 feasible subdecks with $4\leq c\leq9$, and tests the structural classification on all 276 non-target labeled extensions with at least four good vertices. Both independent implementations test the profile equivalence within their respective parameter ranges. The initial boundary conjecture for $s=1$ was falsified by the enumeration; accounting for the pure-$A$ subdeck's mixed competitor corrected the formula. The present proof incorporates this correction.
+\section{Machine-checked proof}
+The full formalization, \texttt{Profiles.lean}, was compiled on a Windows machine using Lean 4.28.0 (commit \texttt{7e01a1bf5c70fc6167d49c345d3bf80596e9a79b}). It contains 2,101 source lines and 114 theorem declarations. The representation of a finite simple graph uses an arbitrary vertex type, an exhaustive duplicate-free finite vertex list, and a symmetric, irreflexive adjacency relation. Isomorphism is defined by an adjacency-preserving bijective relation, including on induced subgraphs. Thus the formal statements do not restrict competitors to a prescribed family or assume a graph-recognition oracle.
+
+The following theorem declarations, in namespace \texttt{CliqueMatching}, connect the combinatorial argument to its graph-theoretic interpretation:
+\begin{center}
+\begin{tabular}{@{}p{.46\linewidth}p{.48\linewidth}@{}}
+\toprule
+Lean theorem & Mathematical content \\
+\midrule
+\texttt{structural\_gluing}, \texttt{finite\_structure} & Classification from four good deletions \\
+\texttt{balanced\_profile}, \texttt{unbalanced\_profile} & Exact card multiplicities \\
+\texttt{type\_iff\_iso}, \texttt{canonical\_deck} & Isomorphism characterization and target deck \\
+\texttt{identifying\_subdeck\_iff} & Complete blocker equivalence \\
+\texttt{exact\_ally\_reconstruction\_number} & Minimum identifying subdeck \\
+\texttt{exact\_adversary\_reconstruction\_number} & Sharp adversary threshold \\
+\bottomrule
+\end{tabular}
+\end{center}
+The last two theorems establish the extremal properties directly over all feasible subdecks, with witnesses for the sharp bounds. The general proof is valid for $c\geq4$; the exceptional case $c=3$ is supported by the separate finite computation, not included in these formal statements.
+
+The command \texttt{lean -o Profiles.olean Profiles.lean} completed with exit code zero. The final declarations were audited with \texttt{\#print axioms}; their only dependencies are the standard Lean axioms \texttt{propext}, \texttt{Classical.choice}, and \texttt{Quot.sound}. There are no admitted proofs or added axioms. The six linter notices concern unused variables or simplification arguments and do not affect correctness. The source SHA-256 is
+\begin{center}\small\ttfamily
+7776a7b0e763a44700d3d81530fb675db\\
+b70a3113168c3bd4785108c28f9e546
+\end{center}
+The machine-checked result is not a substitute for review of the mathematical exposition, the precise scope of prior publications, or a human check of how the formal definitions correspond to the intended mathematical question.
+\section{Comparison with earlier lower bounds}\label{sec:prior}
+The family is denoted $H_n^k$ by Harary and Plantholt \cite{HP}. McMullen and Radziszowski \cite[Section 2.2.4, Theorem 5 and Table 2]{MR} prove that its ally reconstruction number is at least four in the parameter range considered here, report the exact small-order values, and leave the general exact determination open. Their blocking construction already includes the unbalanced competitor $F(c+1,c-1,b)$ and two other unbalanced competitors. Our characterization establishes necessity as well as sufficiency and uses two balanced competitors for the pure subdecks. We do not claim novelty for the earlier lower-bound witnesses or the reported small-order ally values. The published erratum \cite{Err} corrects figure text rather than giving the missing general formula.
+
+The full text of Sathiyabama and Monikandan \cite{SM}, available online on 11 November 2025 and published in the 2026 volume, was inspected, in particular Section 5, Theorem 9 and Corollary 10 (pp.~7--8). Their construction $G(k,n)$ first replaces every vertex of a $d$-regular vertex-transitive graph $G$ by a clique of size $dk+1$, joining adjacent cliques by $k$ disjoint edges for each original edge, so that each vertex is incident with at most one interclique edge. The unique unmatched vertex in each clique is then replaced by $K_n$. Consequently, taking $G=K_2$, $d=1$, $k=b$, and $n=s$ yields
+\[
+ K_2(b,s)\cong F(b+s,b+s,b).
+\]
+Thus their construction includes the entire family considered here, not merely $s=1$. Their Theorem 9 establishes
+\[
+ \rn_\exists(G(k,n))\geq\min(k+1,n+2),
+\]
+with strict inequality when $k\geq n+1$. Corollary 10 attributes the corresponding (non-strict) $K_2$ lower bound to \cite{HP}. Since reconstruction numbers are integers, Theorem 9 states for our family the lower bound
+\[
+ L_{2026}(b,s)=
+ \begin{cases}
+ b+1,&b\leq s,\\
+ s+3,&b\geq s+1.
+ \end{cases}
+\]
+Combining with the lower bound of four in \cite{MR} gives the following comparison (for $c\geq4$):
+\begin{center}
+\begin{tabular}{@{}lll@{}}
+\toprule
+Parameter range & Combined prior lower bound & Exact value here\\
+\midrule
+$s\geq2$, $b=2$ & $4$ & $4$\\
+$s\geq2$, $3\leq b\leq s$ & $b+1$ & $b+2$\\
+$s\geq2$, $b\geq s+1$ & $s+3$ & $s+3$\\
+$s=1$ & $4$ & $\max(5,c)$\\
+\bottomrule
+\end{tabular}
+\end{center}
+For some parameters the earlier lower bound already attains the exact value; the new contribution for those cases is the matching upper bound, not the numerical lower bound. In the other parameter ranges our formula also sharpens the stated lower bounds. Theorem 9 concerns a broader graph construction, whereas our exact calculation is for its $K_2$ specialization. Neither Theorem 9 nor Corollary 10 supplies an exact ally formula, an adversary formula, or an exhaustive characterization of all possible competitors. The class reconstruction numbers studied in Section 6 of \cite{SM} restrict the candidate reconstructions and therefore do not give the unrestricted numbers computed here. Our results should be viewed as complementary to that broader work.
+
+\section{Priority and reproducibility notes}
+Targeted searches through 26 November 2026 using the terminology of \cite{HP,MR,SM}, public arXiv indexing, and GitHub repository/code queries did not reveal an identical general exact formula or the necessary-and-sufficient blocker characterization. The related public Lean repository \url{https://github.com/SamuelSchlesinger/reconstruction-conjecture} was inspected at the indexed overview and file-list level. These are limited searches, not an exhaustive guarantee of priority. The introduction of \cite{SM} states that the lexicographic-product families of Brewster et al. \cite{Brewster} do not include $H_n^k$; the full text of \cite{Brewster} was not available in this session. The 2010 survey \cite{Survey} describes both ally and adversary reconstruction numbers but does not give these formulas. The 2026 full-text comparison removes the principal previously identified uncertainty. The mathematical proof and machine checks are complete in the stated parameter range; independent human review, author attribution, and journal-specific AI-use disclosure are still needed before submission. AI assistance was used extensively for mathematical discovery, drafting, code, and formalization. Human authorship and responsibility must be established before public submission under a person's name.
+
+\begin{thebibliography}{9}
+\bibitem{HP} F. Harary and M. Plantholt, The graph reconstruction number, \emph{Journal of Graph Theory} 9 (1985), 451--454. \url{https://doi.org/10.1002/jgt.3190090403}.
+\bibitem{MR} B. McMullen and S. P. Radziszowski, Graph Reconstruction Numbers, \emph{Journal of Combinatorial Mathematics and Combinatorial Computing} 62 (2007), 85--96. \url{https://www.cs.rit.edu/~spr/PUBL/paper52.pdf}.
+\bibitem{Err} B. McMullen and S. P. Radziszowski, Errata: Graph Reconstruction Numbers, \emph{Journal of Combinatorial Mathematics and Combinatorial Computing} 63 (2007), 93--95. Publisher PDF: \url{https://combinatorialpress.com/article/jcmcc/Volume\%20063/vol-063-paper\%208.pdf}.
+\bibitem{Brewster} R. C. Brewster, G. Hahn, S. W. Lamont and C. Lipka, Lexicographic products with high reconstruction numbers, \emph{Discrete Mathematics} 312 (2012), 1638--1645. \url{https://doi.org/10.1016/j.disc.2012.02.004}.
+\bibitem{Survey} K. J. Asciak, M. A. Francalanza, J. Lauri and W. Myrvold, A survey of some open questions in reconstruction numbers, \emph{Ars Combinatoria} 97 (2010), 443--456.
+\bibitem{SM} S. Sathiyabama and S. Monikandan, On the reconstruction number of generalized join of graphs, \emph{Discrete Mathematics} 349 (2026), 114881. \url{https://doi.org/10.1016/j.disc.2025.114881}.
+\end{thebibliography}
+\end{document}
